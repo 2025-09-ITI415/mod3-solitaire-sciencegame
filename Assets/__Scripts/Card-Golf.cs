@@ -23,7 +23,7 @@ public class Card : MonoBehaviour
     /// </summary>
     /// <param name="eSuit">The suit of the card (e.g., ’C’)</param>
     /// <param name="eRank">The rank from 1 to 13</param>
-    /// <returns></returns>
+    /// <param name="startFaceUp">Whether the card should start face-up</param>
     public void Init(char eSuit, int eRank, bool startFaceUp = true)
     {
         // Assign basic values to the Card
@@ -48,43 +48,42 @@ public class Card : MonoBehaviour
 
     }
 
-    /// <summary>
-    /// Shortcut for setting transform.localPosition.
-    /// </summary>
-    /// <param name="v"></param>
+
+
+
     public virtual void SetLocalPos(Vector3 v)
-    {                              // b
+    {
         transform.localPosition = v;
     }
 
-    // These private variables that will be reused several times                    // c
+    // These private variables that will be reused several times
     private Sprite _tSprite = null;
     private GameObject _tGO = null;
     private SpriteRenderer _tSRend = null;
     // An Euler rotation of 180° around the Z-axis will flip sprites upside down
-    private Quaternion _flipRot = Quaternion.Euler(0, 0, 180);                  // d
+    private Quaternion _flipRot = Quaternion.Euler(0, 0, 180);
 
     /// <summary>
     /// Adds the decorators to the top-left and bottom-right of each card.
-    ///  Decorators are the suit and rank in the corners of each card.
+    /// Decorators are the suit and rank in the corners of each card.
     /// </summary>
     private void AddDecorators()
     {
         // Add Decorators
         foreach (JsonPip pip in JsonParseDeck.DECORATORS)
-        {                         // e
+        {
             if (pip.type == "suit")
             {
                 // Instantiate a Sprite GameObject
-                _tGO = Instantiate<GameObject>(Deck.SPRITE_PREFAB, transform);       // f
-                                                                                     // Get the SpriteRenderer Component
+                _tGO = Instantiate<GameObject>(Deck.SPRITE_PREFAB, transform);
+                // Get the SpriteRenderer Component
                 _tSRend = _tGO.GetComponent<SpriteRenderer>();
                 // Get the suit Sprite from the CardSpritesSO.SUIT static field
                 _tSRend.sprite = CardSpritesSO.SUITS[suit];
             }
             else
             {
-                _tGO = Instantiate<GameObject>(Deck.SPRITE_PREFAB, transform);       // f
+                _tGO = Instantiate<GameObject>(Deck.SPRITE_PREFAB, transform);
                 _tSRend = _tGO.GetComponent<SpriteRenderer>();
                 // Get the rank Sprite from the CardSpritesSO.RANK static field
                 _tSRend.sprite = CardSpritesSO.RANKS[rank];
@@ -93,12 +92,12 @@ public class Card : MonoBehaviour
             }
 
             // Make the Decorator Sprites render above the Card
-            _tSRend.sortingOrder = 1;                                               // g
-                                                                                    // Set the localPosition based on the location from DeckXML
+            _tSRend.sortingOrder = 1;
+            // Set the localPosition based on the location from JSON_Deck
             _tGO.transform.localPosition = pip.loc;
             // Flip the decorator if needed
-            if (pip.flip) _tGO.transform.rotation = _flipRot;                       // h
-                                                                                    // Set the scale to keep decorators from being too big
+            if (pip.flip) _tGO.transform.rotation = _flipRot;
+            // Set the scale to keep decorators from being too big
             if (pip.scale != 1)
             {
                 _tGO.transform.localScale = Vector3.one * pip.scale;
@@ -118,8 +117,8 @@ public class Card : MonoBehaviour
         int pipNum = 0;
         // For each of the pips in the definition...
         foreach (JsonPip pip in def.pips)
-        {                                   // b
-                                            // Instantiate a GameObject from the Deck.SPRITE_PREFAB static field
+        {
+            // Instantiate a GameObject from the Deck.SPRITE_PREFAB static field
             _tGO = Instantiate<GameObject>(Deck.SPRITE_PREFAB, transform);
             // Set the position to that specified in the JSON
             _tGO.transform.localPosition = pip.loc;
@@ -131,8 +130,8 @@ public class Card : MonoBehaviour
                 _tGO.transform.localScale = Vector3.one * pip.scale;
             }
             // Give this GameObject a name
-            _tGO.name = "pip_" + pipNum++;                                      // c
-                                                                                // Get the SpriteRenderer Component
+            _tGO.name = "pip_" + pipNum++;
+            // Get the SpriteRenderer Component
             _tSRend = _tGO.GetComponent<SpriteRenderer>();
             // Set the Sprite to the proper suit
             _tSRend.sprite = CardSpritesSO.SUITS[suit];
@@ -149,20 +148,20 @@ public class Card : MonoBehaviour
     private void AddFace()
     {
         if (def.face == "")
-            return;// No need to run if this isn’t a face card
+            return; // No need to run if this isn’t a face card
 
         // Find a face sprite in CardSpritesSO with the right name
-        string faceName = def.face + suit;                                   // b
-        _tSprite = CardSpritesSO.GET_FACE(faceName);                       // c
+        string faceName = def.face + suit;
+        _tSprite = CardSpritesSO.GET_FACE(faceName);
         if (_tSprite == null)
         {
             Debug.LogError("Face sprite " + faceName + " not found.");
             return;
         }
-        _tGO = Instantiate<GameObject>(Deck.SPRITE_PREFAB, transform);     // d
+        _tGO = Instantiate<GameObject>(Deck.SPRITE_PREFAB, transform);
         _tSRend = _tGO.GetComponent<SpriteRenderer>();
-        _tSRend.sprite = _tSprite;// Assign the face Sprite to _tSRend
-        _tSRend.sortingOrder = 1;// Set the sortingOrder
+        _tSRend.sprite = _tSprite; // Assign the face Sprite to _tSRend
+        _tSRend.sortingOrder = 1;  // Set the sortingOrder
         _tGO.transform.localPosition = Vector3.zero;
         _tGO.name = faceName;
     }
@@ -172,7 +171,7 @@ public class Card : MonoBehaviour
     /// </summary>
     public bool faceUp
     {
-        get { return (!back.activeSelf); }                                   // a
+        get { return (!back.activeSelf); }
         set { back.SetActive(!value); }
     }
 
@@ -186,7 +185,7 @@ public class Card : MonoBehaviour
         _tSRend.sprite = CardSpritesSO.BACK;
         _tGO.transform.localPosition = Vector3.zero;
         // 2 is a higher sortingOrder than anything else
-        _tSRend.sortingOrder = 2;                                            // b
+        _tSRend.sortingOrder = 2;
         _tGO.name = "back";
         back = _tGO;
     }
@@ -198,7 +197,7 @@ public class Card : MonoBehaviour
     /// </summary>
     void PopulateSpriteRenderers()
     {
-        // If we’ve already populated spriteRenderers, just return.            // a
+        // If we’ve already populated spriteRenderers, just return.
         if (spriteRenderers != null) return;
         // GetComponentsInChildren is slow, but we’re only doing it once per card
         spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
@@ -220,12 +219,11 @@ public class Card : MonoBehaviour
 
     /// <summary>
     /// Sets the sortingOrder of the Sprites on this Card. This allows multiple
-    /// Cards to be in the same sorting layer and still overlap properly, and
-    /// it is used by both the draw and discard piles.
+    /// Cards to be in the same sorting layer and still overlap properly.
     /// </summary>
     /// <param name="sOrd">The sortingOrder for the face of the Card</param>
     public void SetSortingOrder(int sOrd)
-    {                                    // b
+    {
         PopulateSpriteRenderers();
 
         foreach (SpriteRenderer srend in spriteRenderers)
@@ -254,29 +252,23 @@ public class Card : MonoBehaviour
         print(name);  // When clicked, this outputs the card name
     }
 
-    /// <summary>
-    /// Return true if the two cards are adjacent in rank.
-    /// If wrap is true, Ace and King are adjacent.
-    /// </summary>
-    /// <param name="otherCard">The card to compare to</param>
-    /// <param name="wrap">If true (default) Ace and King wrap</param>
-    /// <returns>true, if the cards are adjacent</returns>
+  
     public bool AdjacentTo(Card otherCard, bool wrap = true)
     {
         // If either card is face-down, it’s not a valid match.
-        if (!faceUp || !otherCard.faceUp) return (false);
+        if (!faceUp || !otherCard.faceUp) return false;
 
         // If the ranks are 1 apart, they are adjacent
-        if (Mathf.Abs(rank - otherCard.rank) == 1) return (true);
+        if (Mathf.Abs(rank - otherCard.rank) == 1) return true;
 
         if (wrap)
-        {  // If wrap == true, Ace and King are treated as adjacent
-            // If one Card is Ace and the other King, they are adjacent
-            if (rank == 1 && otherCard.rank == 13) return (true);
-            if (rank == 13 && otherCard.rank == 1) return (true);
+        {
+            // Ace and King are treated as adjacent
+            if (rank == 1 && otherCard.rank == 13) return true;
+            if (rank == 13 && otherCard.rank == 1) return true;
         }
 
-        return (false);  // Otherwise, return false
+        return false;
     }
 
 }

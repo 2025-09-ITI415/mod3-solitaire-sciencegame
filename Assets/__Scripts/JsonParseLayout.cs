@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Stores information about the Layout of the Prospector mine.
+/// Stores information about the Layout of the Golf/Prospector tableau.
 /// </summary>
 [System.Serializable]
 public class JsonLayout
@@ -19,24 +19,24 @@ public class JsonLayout
 /// </summary>
 [System.Serializable]
 public class JsonLayoutSlot : ISerializationCallbackReceiver
-{                  // a
+{
     public int id;
     public int x;
     public int y;
     public bool faceUp;
     public string layer;
-    public string hiddenByString;                                         // b
+    public string hiddenByString;
 
-    [System.NonSerialized]                                                      // b
-    public List<int> hiddenBy;                                               // b
+    [System.NonSerialized]
+    public List<int> hiddenBy;
 
     /// <summary>
     /// Pulls data from hiddenByString and places it into the hiddenBy List
     /// </summary>
     public void OnAfterDeserialize()
-    {                                          // c
+    {
         hiddenBy = new List<int>();
-        if (hiddenByString.Length == 0) return;
+        if (string.IsNullOrEmpty(hiddenByString)) return;
 
         string[] bits = hiddenByString.Split(',');
         for (int i = 0; i < bits.Length; i++)
@@ -48,7 +48,7 @@ public class JsonLayoutSlot : ISerializationCallbackReceiver
     /// <summary>
     /// Required by ISerializationCallbackReceiver, but empty in this class
     /// </summary>
-    public void OnBeforeSerialize() { }     // Note the empty braces here        // d
+    public void OnBeforeSerialize() { }
 }
 
 /// <summary>
@@ -76,7 +76,8 @@ public class JsonParseLayout : MonoBehaviour
     void Awake()
     {
         layout = JsonUtility.FromJson<JsonLayout>(jsonLayoutFile.text);
-        S = this;                                                               // e
+        S = this;
+
     }
 
 }
